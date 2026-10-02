@@ -116,13 +116,12 @@ h2 {
   position: relative;
 }
 
-.hero {
+.sprite {
   position: absolute;
-  z-index: 2;
   pointer-events: none;
 }
 
-.hero img {
+.sprite img {
   display: block;
   width: 100%;
   image-rendering: pixelated;
