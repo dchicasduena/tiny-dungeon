@@ -26,7 +26,7 @@ function floorBorders(grid, r, c) {
   return pickBorders(sides, diagonals)
 }
 
-export default function Room({ grid, doorOpen = false }) {
+export default function Room({ grid, doorOpen = false, children }) {
   const cells = useMemo(() => {
     const out = []
     const walls = buildWallRows(grid)
@@ -54,6 +54,7 @@ export default function Room({ grid, doorOpen = false }) {
           ))}
         </div>
       ))}
+      {children}
     </div>
   )
 }

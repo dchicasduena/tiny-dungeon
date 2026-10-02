@@ -104,6 +104,7 @@ h2 {
 }
 
 .room {
+  position: relative;
   --tile: min(calc((100vh - 120px) / var(--grid-size)), calc(90vw / var(--grid-size)));
   display: grid;
   grid-template-columns: repeat(var(--grid-size), var(--tile));
@@ -113,6 +114,18 @@ h2 {
 
 .room-cell {
   position: relative;
+}
+
+.hero {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero img {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
 }
 
 .room-cell.is-floor {

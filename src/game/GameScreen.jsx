@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Room from './Room.jsx'
+import Hero from './Hero.jsx'
 import { generateRoom } from './generateRoom.js'
 
 export default function GameScreen() {
@@ -11,7 +12,9 @@ export default function GameScreen() {
       <Link className="back-link" to="/">
         back to title
       </Link>
-      <Room grid={grid} />
+      <Room grid={grid}>
+        <Hero grid={grid} />
+      </Room>
       <button type="button" className="regen-button" onClick={() => setGrid(generateRoom())}>
         new room
       </button>
