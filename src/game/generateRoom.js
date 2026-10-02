@@ -1,4 +1,4 @@
-export const GRID_SIZE = 16
+export const GRID_SIZE = 32
 
 export const VOID = 0
 export const FLOOR = 1
@@ -7,9 +7,10 @@ export const WALL = 2
 const randInt = (min, max) => min + Math.floor(Math.random() * (max - min + 1))
 const pick = (list) => list[Math.floor(Math.random() * list.length)]
 
-// Row 0 and 1 stay free so every floor cell can have a wall above it.
+// Rows 0 and 1 stay free so every floor cell can have a wall above it.
 const MIN_ROW = 2
 const MAX = GRID_SIZE - 1
+const CORRIDOR_WIDTH = 3
 
 function fill(grid, { x, y, w, h }) {
   for (let r = y; r < y + h; r++) {
@@ -19,73 +20,77 @@ function fill(grid, { x, y, w, h }) {
   }
 }
 
-const centered = (size, span) => Math.floor((span - size) / 2)
-
-// One big rectangle.
-function hall(grid) {
-  const w = randInt(8, 14)
-  const h = randInt(6, 12)
-  fill(grid, { x: randInt(1, MAX - w), y: randInt(MIN_ROW, MAX - h), w, h })
-}
-
-// Two overlapping rectangles: L, T or Z shapes depending on offsets.
-function lShape(grid) {
-  const w1 = randInt(8, 13)
-  const h1 = randInt(4, 7)
-  const x1 = randInt(1, MAX - w1)
-  const y1 = randInt(MIN_ROW, MAX - h1 - 3)
-  fill(grid, { x: x1, y: y1, w: w1, h: h1 })
-
-  const w2 = randInt(4, 6)
-  const h2 = randInt(4, MAX - y1 - h1 + 2)
-  const x2 = pick([x1, x1 + w1 - w2, x1 + randInt(0, w1 - w2)])
-  fill(grid, { x: x2, y: y1 + h1 - 2, w: w2, h: h2 })
-}
-
-// Plus-shaped room.
-function cross(grid) {
-  const armW = randInt(4, 6)
-  const armH = randInt(4, 6)
-  const longW = randInt(10, 14)
-  const longH = randInt(10, 12)
-  const cx = randInt(centered(longW, GRID_SIZE) - 1, centered(longW, GRID_SIZE) + 1)
-  const cy = MIN_ROW + randInt(0, 1)
-  fill(grid, { x: cx + centered(armW, longW), y: cy, w: armW, h: longH })
-  fill(grid, { x: cx, y: cy + centered(armH, longH), w: longW, h: armH })
-}
-
-// Several overlapping rectangles forming an irregular cave.
-function cave(grid) {
-  let prev = null
-  const count = randInt(4, 7)
-  for (let i = 0; i < count; i++) {
-    const w = randInt(4, 9)
-    const h = randInt(4, 7)
-    let x = randInt(1, MAX - w)
-    let y = randInt(MIN_ROW, MAX - h)
-    if (prev) {
-      x = Math.max(1, Math.min(MAX - w, prev.x + randInt(-w + 3, prev.w - 3)))
-      y = Math.max(MIN_ROW, Math.min(MAX - h, prev.y + randInt(-h + 3, prev.h - 3)))
-    }
-    fill(grid, { x, y, w, h })
-    prev = { x, y, w, h }
+// Rectangle, L-shape or plus-shape inside the given bounds.
+function carveRoom(grid, room) {
+  const { x, y, w, h } = room
+  const roll = Math.random()
+  if (roll < 0.5 || w < 7 || h < 7) {
+    fill(grid, room)
+  } else if (roll < 0.75) {
+    const cutW = randInt(2, Math.floor(w / 2) - 1)
+    const cutH = randInt(2, Math.floor(h / 2) - 1)
+    const left = Math.random() < 0.5
+    const top = Math.random() < 0.5
+    fill(grid, { x: left ? x + cutW : x, y, w: w - cutW, h })
+    fill(grid, { x, y: top ? y + cutH : y, w, h: h - cutH })
+  } else {
+    const armW = randInt(3, Math.floor(w / 2))
+    const armH = randInt(3, Math.floor(h / 2))
+    fill(grid, { x: x + Math.floor((w - armW) / 2), y, w: armW, h })
+    fill(grid, { x, y: y + Math.floor((h - armH) / 2), w, h: armH })
   }
 }
 
-// Wide central room with a chamber attached on each side.
-function chambers(grid) {
-  const w = randInt(6, 8)
-  const h = randInt(6, 9)
-  const x = centered(w, GRID_SIZE)
-  const y = randInt(MIN_ROW, MAX - h)
-  fill(grid, { x, y, w, h })
-  const side = randInt(4, 5)
-  const sideH = randInt(4, Math.min(6, h))
-  fill(grid, { x: x - side + 1, y: y + randInt(0, h - sideH), w: side, h: sideH })
-  fill(grid, { x: x + w - 1, y: y + randInt(0, h - sideH), w: side, h: sideH })
+const center = (r) => ({ x: Math.floor(r.x + r.w / 2), y: Math.floor(r.y + r.h / 2) })
+
+// L-shaped corridor: horizontal from a, then vertical to b.
+function carveCorridor(grid, a, b) {
+  const half = Math.floor(CORRIDOR_WIDTH / 2)
+  const x0 = Math.min(a.x, b.x) - half
+  const x1 = Math.max(a.x, b.x) + half + 1
+  const y0 = Math.min(a.y, b.y) - half
+  const y1 = Math.max(a.y, b.y) + half + 1
+  fill(grid, { x: x0, y: a.y - half, w: x1 - x0, h: CORRIDOR_WIDTH })
+  fill(grid, { x: b.x - half, y: y0, w: CORRIDOR_WIDTH, h: y1 - y0 })
 }
 
-const SHAPES = [hall, lShape, cross, cave, chambers]
+const overlaps = (a, b, margin) =>
+  a.x < b.x + b.w + margin &&
+  a.x + a.w + margin > b.x &&
+  a.y < b.y + b.h + margin &&
+  a.y + a.h + margin > b.y
+
+function placeNear(from, w, h) {
+  const gap = randInt(3, 6)
+  const dir = pick(['left', 'right', 'up', 'down'])
+  const offsetX = randInt(-Math.floor(w / 2), Math.floor(from.w / 2))
+  const offsetY = randInt(-Math.floor(h / 2), Math.floor(from.h / 2))
+  if (dir === 'left') return { x: from.x - gap - w, y: from.y + offsetY, w, h }
+  if (dir === 'right') return { x: from.x + from.w + gap, y: from.y + offsetY, w, h }
+  if (dir === 'up') return { x: from.x + offsetX, y: from.y - gap - h, w, h }
+  return { x: from.x + offsetX, y: from.y + from.h + gap, w, h }
+}
+
+const inBounds = (r) => r.x >= 1 && r.y >= MIN_ROW && r.x + r.w <= MAX && r.y + r.h <= MAX
+
+// Rooms grow outward from a first room, each linked to its parent by a corridor.
+function carveLayout(grid) {
+  const first = { w: randInt(7, 11), h: randInt(6, 9) }
+  first.x = randInt(8, GRID_SIZE - 8 - first.w)
+  first.y = randInt(8, GRID_SIZE - 8 - first.h)
+  const rooms = [first]
+  carveRoom(grid, first)
+
+  const target = randInt(6, 10)
+  for (let attempt = 0; attempt < 300 && rooms.length < target; attempt++) {
+    const parent = pick(rooms)
+    const next = placeNear(parent, randInt(5, 11), randInt(5, 9))
+    if (!inBounds(next) || rooms.some((r) => overlaps(r, next, 2))) continue
+    carveRoom(grid, next)
+    carveCorridor(grid, center(parent), center(next))
+    rooms.push(next)
+  }
+}
 
 // A void cell directly above a floor cell becomes a wall facing the player.
 function raiseWalls(grid) {
@@ -98,7 +103,7 @@ function raiseWalls(grid) {
 
 export function generateRoom() {
   const grid = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(VOID))
-  pick(SHAPES)(grid)
+  carveLayout(grid)
   raiseWalls(grid)
   return grid
 }

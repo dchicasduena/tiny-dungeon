@@ -3,6 +3,7 @@ import { WALL_TILES } from './environmentAssets.js'
 import { pickBorders } from './floorBorders.js'
 import { FLOOR, GRID_SIZE, VOID, WALL } from './generateRoom.js'
 import { buildWallRows } from './wallRows.js'
+import { ZOOM } from './sprite.js'
 
 const at = (grid, r, c) => grid[r]?.[c] ?? VOID
 
@@ -46,7 +47,7 @@ export default function Room({ grid, doorOpen = false, children }) {
   }, [grid, doorOpen])
 
   return (
-    <div className="room" style={{ '--grid-size': GRID_SIZE }}>
+    <div className="room" style={{ '--grid-size': GRID_SIZE, '--zoom': ZOOM }}>
       {cells.map(({ key, type, layers }) => (
         <div key={key} className={`room-cell ${type === FLOOR ? 'is-floor' : ''}`}>
           {layers?.map((url, i) => (

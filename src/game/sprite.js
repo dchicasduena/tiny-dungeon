@@ -1,6 +1,9 @@
 import { GRID_SIZE } from './generateRoom.js'
 import { SPRITE } from './spriteAnims.js'
 
+// The room is drawn this many times larger than the visible window; the camera follows the hero.
+export const ZOOM = 1.5
+
 // Drives one on-screen sprite element: picks the frame and positions it in the room.
 export function createSprite(box) {
   const img = box.querySelector('img')

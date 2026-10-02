@@ -94,18 +94,23 @@ h2 {
 
 .game-screen {
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 56px 32px 32px;
   background: #161616;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
+}
+
+.viewport {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .room {
   position: relative;
-  --tile: min(calc((100vh - 120px) / var(--grid-size)), calc(90vw / var(--grid-size)));
+  --tile: calc(min(calc(100vh - 120px), 90vw) * var(--zoom) / var(--grid-size));
+  width: calc(var(--tile) * var(--grid-size));
+  height: calc(var(--tile) * var(--grid-size));
   display: grid;
   grid-template-columns: repeat(var(--grid-size), var(--tile));
   grid-template-rows: repeat(var(--grid-size), var(--tile));
@@ -140,6 +145,9 @@ h2 {
 }
 
 .regen-button {
+  position: absolute;
+  top: 16px;
+  right: 32px;
   background: none;
   border: 1px solid #e9e9e9;
   color: #e9e9e9;
@@ -149,8 +157,8 @@ h2 {
 
 .back-link {
   position: absolute;
-  top: 24px;
-  left: 24px;
+  top: 20px;
+  left: 32px;
   color: #e9e9e9;
   font-size: 0.875rem;
   text-decoration: none;

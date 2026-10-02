@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { canStand, findSpawn, standableSpots } from './collision.js'
 import { ENEMY_NAMES, ENEMY_TYPES } from './enemyAssets.js'
+import { GRID_SIZE } from './generateRoom.js'
 import { HERO_ANIMS } from './heroAssets.js'
 import { createSprite } from './sprite.js'
 import { SPRITE, preload } from './spriteAnims.js'
@@ -52,6 +53,7 @@ export default function World({ grid }) {
 
   useEffect(() => {
     preload([HERO_ANIMS, ...Object.values(ENEMY_TYPES)])
+    const room = heroBox.current.parentElement
 
     const hero = {
       x: plan.hero.x,
@@ -265,6 +267,13 @@ export default function World({ grid }) {
       last = now
       updateHero(now, dt)
       enemies.forEach((e) => updateEnemy(e, now, dt))
+      const view = room.parentElement
+      const size = room.offsetWidth
+      const shift = (pos, viewSpan) => {
+        if (size <= viewSpan) return (viewSpan - size) / 2
+        return Math.min(0, Math.max(viewSpan - size, viewSpan / 2 - (pos / GRID_SIZE) * size))
+      }
+      room.style.transform = `translate(${shift(hero.x, view.clientWidth)}px, ${shift(hero.y, view.clientHeight)}px)`
       raf = requestAnimationFrame(tick)
     }
 
@@ -283,7 +292,7 @@ export default function World({ grid }) {
     }
   }, [plan, grid])
 
-  const width = `${(SPRITE.size / 16) * 100}%`
+  const width = `${(SPRITE.size / GRID_SIZE) * 100}%`
 
   return (
     <>

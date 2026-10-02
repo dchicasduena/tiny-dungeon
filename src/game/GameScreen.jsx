@@ -12,9 +12,11 @@ export default function GameScreen() {
       <Link className="back-link" to="/">
         back to title
       </Link>
-      <Room grid={grid}>
-        <World grid={grid} />
-      </Room>
+      <div className="viewport">
+        <Room grid={grid}>
+          <World grid={grid} />
+        </Room>
+      </div>
       <button type="button" className="regen-button" onClick={() => setGrid(generateRoom())}>
         new room
       </button>
