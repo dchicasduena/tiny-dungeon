@@ -96,6 +96,43 @@ h2 {
   position: relative;
   min-height: 100vh;
   background: #161616;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.room {
+  --tile: min(calc((100vh - 120px) / var(--grid-size)), calc(90vw / var(--grid-size)));
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), var(--tile));
+  grid-template-rows: repeat(var(--grid-size), var(--tile));
+  image-rendering: pixelated;
+}
+
+.room-cell {
+  position: relative;
+}
+
+.room-cell.is-floor {
+  background: #161616;
+}
+
+.room-cell img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.regen-button {
+  background: none;
+  border: 1px solid #e9e9e9;
+  color: #e9e9e9;
+  padding: 6px 14px;
+  cursor: pointer;
 }
 
 .back-link {
