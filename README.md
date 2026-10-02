@@ -18,5 +18,7 @@ npm run deploy
 ```
 
 ## assets
-- https://sorto-dedd.itch.io/dummy-dungeon
-- https://sorto-dedd.itch.io/dummy-dungeon-character-pack
+- dummy dungeon assets: https://sorto-dedd.itch.io/dummy-dungeon
+- dummy dungeon more assets: https://sorto-dedd.itch.io/dummy-dungeon-character-pack
+- pixelta font: https://www.dafont.com/pixelta.font?fpp=2008
+- dungeon font: https://vrtxrry.itch.io/dungeonfont
