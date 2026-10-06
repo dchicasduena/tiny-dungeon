@@ -46,8 +46,10 @@ function planRoom(grid) {
   return { hero, enemies }
 }
 
-export default function World({ grid }) {
+export default function World({ grid, door, doorOpen, onCleared, onExit }) {
   const plan = useMemo(() => planRoom(grid), [grid])
+  const callbacks = useRef({})
+  callbacks.current = { door, doorOpen, onCleared, onExit }
   const heroBox = useRef(null)
   const enemyBoxes = useRef([])
 
@@ -82,6 +84,8 @@ export default function World({ grid }) {
     const held = []
     let last = performance.now()
     let raf
+    let cleared = false
+    let left = false
 
     const setState = (ent, state) => {
       ent.state = state
@@ -259,7 +263,12 @@ export default function World({ grid }) {
     const onBlur = () => (held.length = 0)
     const onPointerDown = (ev) => {
       if (ev.button !== 0 || ev.target.closest('a, button')) return
-      if (hero.state === 'free') setState(hero, 'attack')
+      if (hero.state !== 'free') return
+      const box = heroBox.current.getBoundingClientRect()
+      const dx = ev.clientX - (box.left + box.width / 2)
+      const dy = ev.clientY - (box.top + box.height / 2)
+      if (dx || dy) hero.facing = faceVec(dx, dy)
+      setState(hero, 'attack')
     }
 
     const tick = (now) => {
@@ -267,6 +276,17 @@ export default function World({ grid }) {
       last = now
       updateHero(now, dt)
       enemies.forEach((e) => updateEnemy(e, now, dt))
+      if (!cleared && enemies.every((e) => e.state === 'gone')) {
+        cleared = true
+        callbacks.current.onCleared()
+      }
+      const { door: exit, doorOpen: open, onExit } = callbacks.current
+      if (open && exit && heroAlive() && !left) {
+        if (Math.abs(hero.x - (exit.c + 0.5)) < 0.6 && hero.y < exit.r + 1.6) {
+          left = true
+          onExit()
+        }
+      }
       const view = room.parentElement
       const size = room.offsetWidth
       const shift = (pos, viewSpan) => {

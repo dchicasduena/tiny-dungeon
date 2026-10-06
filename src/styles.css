@@ -155,16 +155,42 @@ h2 {
   cursor: pointer;
 }
 
-.back-link {
+.back-link {  
   position: absolute;
-  top: 20px;
-  left: 32px;
+  bottom: 20px;
   color: #e9e9e9;
-  font-size: 0.875rem;
+  font-size: 2rem;
   text-decoration: none;
 }
 
 .back-link:hover {
+  text-decoration: underline;
+}
+
+.credits-link {
+  position: absolute;
+  bottom: 20px;
+  color: #e9e9e9;
+  font-size: 2rem;
+  text-decoration: none;
+}
+
+.credits-link:hover {
+  text-decoration: underline;
+}
+
+.credits-text {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.credits-text-link {
+  color: #e9e9e9;
+  font-size: 2rem;
+  text-decoration: none;
+}
+
+.credits-text-link:hover {
   text-decoration: underline;
 }
 

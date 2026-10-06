@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { WALL_TILES } from './environmentAssets.js'
 import { pickBorders } from './floorBorders.js'
 import { FLOOR, GRID_SIZE, VOID, WALL } from './generateRoom.js'
-import { buildWallRows } from './wallRows.js'
 import { ZOOM } from './sprite.js'
 
 const at = (grid, r, c) => grid[r]?.[c] ?? VOID
@@ -27,10 +26,9 @@ function floorBorders(grid, r, c) {
   return pickBorders(sides, diagonals)
 }
 
-export default function Room({ grid, doorOpen = false, children }) {
+export default function Room({ grid, walls, doorOpen = false, children }) {
   const cells = useMemo(() => {
     const out = []
-    const walls = buildWallRows(grid)
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
         const type = grid[r][c]
@@ -44,7 +42,7 @@ export default function Room({ grid, doorOpen = false, children }) {
       }
     }
     return out
-  }, [grid, doorOpen])
+  }, [grid, walls, doorOpen])
 
   return (
     <div className="room" style={{ '--grid-size': GRID_SIZE, '--zoom': ZOOM }}>
